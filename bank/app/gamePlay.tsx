@@ -5,6 +5,7 @@ import DiceRoller from "../components/Dice";
 export default function GamePlay() {
   const [countdown, setCountdown] = useState(5);
   const [rollTrigger, setRollTrigger] = useState(0);
+  const [pot, setPot] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -55,11 +56,28 @@ export default function GamePlay() {
           </View>
         </ScrollView>
       </View>
-      <Text style={{ fontSize: 18, textAlign: "center", marginTop: 16 }}>
+      <Text
+        style={{
+          fontSize: 32,
+          textAlign: "center",
+          marginTop: 12,
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
         Rolling in {countdown}...
       </Text>
-
-      <DiceRoller trigger={rollTrigger} />
+      <DiceRoller trigger={rollTrigger} onPotChange={setPot} />
+      <Text
+        style={{
+          fontSize: 32,
+          textAlign: "center",
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
+        POT: {pot}
+      </Text>
     </View>
   );
 }

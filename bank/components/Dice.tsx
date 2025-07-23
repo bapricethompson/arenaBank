@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 
 const diceFaces = {
   1: [[1, 1]],
@@ -42,20 +36,61 @@ const diceFaces = {
   ],
 };
 
-const DiceRoller = ({ trigger }) => {
+const DiceRoller = ({ trigger, onPotChange }) => {
   const [dice, setDice] = useState([1, 1]);
+  const [rolls, setRolls] = useState(0);
+  const [pot, setPot] = useState(0);
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     rollDice();
   }, [trigger]);
 
+  useEffect(() => {
+    onPotChange(pot);
+  }, [pot]);
+
   const rollDice = () => {
     const newDice = [
       Math.ceil(Math.random() * 6),
       Math.ceil(Math.random() * 6),
     ];
+
     setDice(newDice);
+
+    const sum = newDice[0] + newDice[1];
+    const isDouble = newDice[0] === newDice[1];
+
+    // First update rolls and get the new rolls count
+    setRolls((prevRolls) => {
+      const newRolls = prevRolls + 1;
+
+      // Then update pot based on newRolls and dice outcome
+      setPot((prevPot) => {
+        if (sum === 7) {
+          if (newRolls <= 3) {
+            return prevPot + 70;
+          } else {
+            return 0;
+          }
+        } else if (isDouble) {
+          if (newRolls <= 3) {
+            return prevPot + sum;
+          } else {
+            return prevPot * 2;
+          }
+        } else {
+          return prevPot + sum;
+        }
+      });
+
+      // Reset rolls to 0 if sum is 7 and newRolls > 3
+      if (sum === 7 && newRolls > 3) {
+        setRolls(0);
+      }
+
+      return newRolls; // update rolls state
+    });
 
     // Shake animation
     Animated.sequence([
@@ -119,9 +154,6 @@ const DiceRoller = ({ trigger }) => {
       <View style={styles.diceContainer}>
         {dice.map((val, i) => renderDie(val, i))}
       </View>
-      <TouchableOpacity onPress={rollDice} style={styles.button}>
-        <Text style={styles.buttonText}>Roll Dice</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -130,12 +162,11 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40,
+    marginVertical: 8,
   },
   diceContainer: {
     flexDirection: "row",
     gap: 20,
-    marginBottom: 20,
   },
   die: {
     width: 80,

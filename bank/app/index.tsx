@@ -13,7 +13,7 @@ export default function HomeScreen() {
           onChangeText={setValue}
           placeholder="Enter code"
         />
-        <StyledButton title="Join" href="/gamePlay" />
+        <StyledButton title="Join" href="/createGame" />
       </View>
     </View>
   );
