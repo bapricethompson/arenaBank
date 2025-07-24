@@ -5,15 +5,27 @@ export default function CreateGame() {
   const [value, setValue] = useState("");
   return (
     <View>
-      <Text>Create Game</Text>
-      <Text style={styles.label}>Event Name:</Text>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={setValue}
-        placeholder="Event name"
-      />
-      <DropdownMenu></DropdownMenu>
+      <Text
+        style={{
+          fontSize: 32,
+          textAlign: "center",
+          marginTop: 5,
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
+        Create Game
+      </Text>
+      <View style={styles.gameWrapper}>
+        <Text style={styles.label}>Event Name:</Text>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={setValue}
+          placeholder="Event name"
+        />
+        <DropdownMenu></DropdownMenu>
+      </View>
     </View>
   );
 }
@@ -26,6 +38,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 16,
     color: "#FFF5E1",
+  },
+  gameWrapper: {
+    marginHorizontal: "auto",
+    width: "70%",
+    marginVertical: 12,
   },
   input: {
     borderWidth: 1,

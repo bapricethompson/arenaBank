@@ -22,16 +22,18 @@ const DropdownMenu = () => {
           visible={visible}
           onDismiss={closeMenu}
           anchor={
-            <Button
-              mode="outlined"
-              onPress={openMenu}
-              style={styles.button}
-              contentStyle={styles.buttonContent}
-              labelStyle={{ color: theme.colors.primary, fontWeight: "600" }}
-              uppercase={false}
-            >
-              {selected}
-            </Button>
+            <View style={styles.anchorWrapper}>
+              <Button
+                mode="outlined"
+                onPress={openMenu}
+                style={styles.button}
+                contentStyle={styles.buttonContent}
+                labelStyle={{ color: theme.colors.primary, fontWeight: "600" }}
+                uppercase={false}
+              >
+                {selected}
+              </Button>
+            </View>
           }
           contentStyle={styles.menuContent}
         >
@@ -61,11 +63,15 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     flexDirection: "row",
     justifyContent: "center",
-    height: 48,
+  },
+  anchorWrapper: {
+    width: 200, // 👈 Ensures iOS calculates anchor layout correctly
   },
   button: {
     borderRadius: 4,
-    borderColor: "#6200ee", // Primary color
+    borderColor: "#6200ee",
+    borderWidth: 1,
+    width: "100%",
   },
   buttonContent: {
     height: 48,
@@ -74,7 +80,7 @@ const styles = StyleSheet.create({
   menuContent: {
     borderRadius: 4,
     backgroundColor: "white",
-    elevation: 4, // shadow for Android
+    elevation: 4,
   },
   menuItemText: {
     fontSize: 16,

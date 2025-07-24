@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { io } from "socket.io-client";
+import StyledButton from "../components/Button";
 import DiceRoller from "../components/Dice";
+
+const socket = io("http://<your-ip>:3001");
 
 export default function GamePlay() {
   const [countdown, setCountdown] = useState(5);
@@ -60,7 +64,7 @@ export default function GamePlay() {
         style={{
           fontSize: 32,
           textAlign: "center",
-          marginTop: 12,
+          marginTop: 5,
           color: "white",
           fontWeight: "bold",
         }}
@@ -76,8 +80,24 @@ export default function GamePlay() {
           fontWeight: "bold",
         }}
       >
-        POT: {pot}
+        POT:
       </Text>
+      <Text
+        style={{
+          fontSize: 96,
+          textAlign: "center",
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
+        {pot}
+      </Text>
+      <View style={styles.powerHolder}>
+        <View style={styles.powerUp}></View>
+        <View style={styles.powerUp}></View>
+        <View style={styles.powerUp}></View>
+      </View>
+      <StyledButton title="BANK" href="/gamePlay" />
     </View>
   );
 }
@@ -88,7 +108,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    marginTop: 10,
+    marginTop: 5,
+  },
+  powerHolder: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "75%",
+    marginHorizontal: "auto",
+  },
+  powerUp: {
+    width: 80,
+    height: 80,
+    backgroundColor: "#FFBF00",
+    borderRadius: 5,
   },
   gameText: {
     color: "white",
@@ -99,7 +132,7 @@ const styles = StyleSheet.create({
     width: "90%",
     marginHorizontal: "auto",
     marginVertical: 15,
-    height: 155,
+    height: 125,
   },
   player: {
     flexDirection: "row",

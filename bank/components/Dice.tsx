@@ -52,8 +52,8 @@ const DiceRoller = ({ trigger, onPotChange }) => {
 
   const rollDice = () => {
     const newDice = [
-      Math.ceil(Math.random() * 6),
-      Math.ceil(Math.random() * 6),
+      Math.ceil(Math.random() * 6) + 1,
+      Math.ceil(Math.random() * 6) + 1,
     ];
 
     setDice(newDice);
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 8,
+    marginVertical: 4,
   },
   diceContainer: {
     flexDirection: "row",
