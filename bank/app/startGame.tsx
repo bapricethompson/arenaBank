@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import StyledButton from "../components/Button";
-import Dropdown from "../components/DropDown";
-import Counter from "../components/RoundCounter";
 
-export default function CreateGame() {
+export default function startGame() {
   const [value, setValue] = useState("");
   return (
     <View>
@@ -17,29 +15,18 @@ export default function CreateGame() {
           fontWeight: "bold",
         }}
       >
-        Create Game
+        Share Game
       </Text>
       <View style={styles.gameWrapper}>
-        <Text style={styles.label}>Event Name:</Text>
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={setValue}
-          placeholder="Event name"
-        />
-        <Dropdown></Dropdown>
-        <Text style={styles.label}>Rounds:</Text>
-        <View style={styles.container}>
-          <Counter />
-        </View>
         <Text style={styles.label}>Game Code:</Text>
         <TextInput
           style={styles.input}
           value={value}
           onChangeText={setValue}
           placeholder="Game Code"
+          editable={false}
         />
-        <StyledButton title="Create Game" href="/startGame" />
+        <StyledButton title="Start Game" href="/gamePlay" />
       </View>
     </View>
   );
@@ -50,7 +37,6 @@ const styles = StyleSheet.create({
     width: "70%",
   },
   label: {
-    marginTop: 20,
     marginBottom: 4,
     fontSize: 16,
     color: "#FFF5E1",
@@ -58,7 +44,7 @@ const styles = StyleSheet.create({
   gameWrapper: {
     marginHorizontal: "auto",
     width: "70%",
-    marginVertical: 10,
+    marginVertical: 12,
   },
   input: {
     borderWidth: 1,

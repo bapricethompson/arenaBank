@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { io } from "socket.io-client";
-import StyledButton from "../components/Button";
 import DiceRoller from "../components/Dice";
+import GameButton from "../components/GameButton";
 
 const socket = io("http://<your-ip>:3001");
 
 export default function GamePlay() {
+  const [round, setRound] = useState(1);
   const [countdown, setCountdown] = useState(5);
   const [rollTrigger, setRollTrigger] = useState(0);
   const [pot, setPot] = useState(0);
@@ -24,6 +25,15 @@ export default function GamePlay() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const handlePowerUp = (name) => {
+    console.log("Used power-up:", name);
+  };
+
+  const handleBank = () => {
+    console.log("BANKED!");
+  };
+
   return (
     <View>
       <View>
@@ -93,11 +103,31 @@ export default function GamePlay() {
         {pot}
       </Text>
       <View style={styles.powerHolder}>
-        <View style={styles.powerUp}></View>
-        <View style={styles.powerUp}></View>
-        <View style={styles.powerUp}></View>
+        <GameButton
+          title="🔥"
+          onPress={() => handlePowerUp("Fire")}
+          type="powerup"
+        />
+        <GameButton
+          title="🛡️"
+          onPress={() => handlePowerUp("Shield")}
+          type="powerup"
+        />
+        <GameButton
+          title="🎯"
+          onPress={() => handlePowerUp("Target")}
+          type="powerup"
+        />
       </View>
-      <StyledButton title="BANK" href="/gamePlay" />
+      <View style={styles.container}>
+        <GameButton
+          title="BANK"
+          onPress={handleBank}
+          type="bank"
+          disabledOnceUsed={false}
+          roundKey={round} // triggers re-enable per round
+        />
+      </View>
     </View>
   );
 }
@@ -143,5 +173,10 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 7,
     borderRadius: 5,
+  },
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 15,
   },
 });

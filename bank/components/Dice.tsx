@@ -5,7 +5,6 @@ const diceFaces = {
   1: [[1, 1]],
   2: [
     [0, 0],
-    [1, 1],
     [2, 2],
   ],
   3: [
@@ -52,8 +51,8 @@ const DiceRoller = ({ trigger, onPotChange }) => {
 
   const rollDice = () => {
     const newDice = [
-      Math.ceil(Math.random() * 6) + 1,
-      Math.ceil(Math.random() * 6) + 1,
+      Math.ceil(Math.random() * 6),
+      Math.ceil(Math.random() * 6),
     ];
 
     setDice(newDice);
@@ -67,6 +66,12 @@ const DiceRoller = ({ trigger, onPotChange }) => {
 
       // Then update pot based on newRolls and dice outcome
       setPot((prevPot) => {
+        console.log(
+          "🎲 Rolled Dice:",
+          newDice,
+          "Sum:",
+          newDice[0] + newDice[1]
+        );
         if (sum === 7) {
           if (newRolls <= 3) {
             return prevPot + 70;
