@@ -1,8 +1,4 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -23,7 +19,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <Stack
         screenOptions={{
           headerShown: true,
@@ -50,9 +46,11 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ title: "Home" }} />
         <Stack.Screen name="gamePlay" options={{ title: "Bank" }} />
         <Stack.Screen name="waitingRoom" options={{ title: "Waiting Room" }} />
+        <Stack.Screen name="createGame" options={{ title: "Create" }} />
+        <Stack.Screen name="startGame" options={{ title: "Start" }} />
         <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }
