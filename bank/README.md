@@ -1,50 +1,76 @@
-# Welcome to your Expo app 👋
+# Arena Bank
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Arena Bank** is a party game app built with [React Native](https://reactnative.dev/) and [Expo](https://expo.dev/), designed for large gatherings. Players join a shared game of "bank", but with a twist. This isn’t your traditional bank! We’ve added power-ups, timed rolls, and custom game logic to make the experience more fast-paced, chaotic, and fun.
 
-## Get started
+Whether you're at a family reunion, game night, or party, **Arena Bank** makes it easy to dive into group fun with just a smartphone.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- **Join Multiplayer Games** — Players connect and play together in real time.
+- **Timed Rolls** — Keep the pace fast and strategic.
+- **Power-Ups** — Add unpredictable elements to keep everyone on their toes.
+- **Arena-Style Gameplay** — Designed for dynamic, in-person party environments.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+This app is built with a powerful combination of tools:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Core
 
-## Get a fresh project
+- [`expo`](https://expo.dev/) – Fast development and easy deployment
+- [`react-native`](https://reactnative.dev/) – Native mobile development
 
-When you're ready, run:
+### Navigation & UI
 
-```bash
-npm run reset-project
-```
+- `expo-router` – File-based routing system for screens
+- `@react-navigation/native`, `bottom-tabs`, `elements` – Smooth and flexible navigation
+- `react-native-paper`, `@expo/vector-icons`, `react-native-vector-icons` – Modern Material Design components and icons
+- `react-native-dropdown-picker` – For clean and interactive dropdowns
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Real-Time Communication
 
-## Learn more
+- `socket.io` & `socket.io-client` – Live multiplayer syncing and event broadcasting
 
-To learn more about developing your project with Expo, look at the following resources:
+### Backend
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+The backend is currently **a work in progress** and will eventually support game state management, player matchmaking, persistent data, and more using:
 
-## Join the community
+- `express`
+- `firebase`
+- `cors`
+- `websockets`
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Design Principles
+
+### 1. Consistent Layout and Hierarchy
+
+- Titles are styled clearly using `fontSize: 32` and bold weight, following best practices from both Material Design and Apple’s HIG.
+- Centralized layouts using `alignItems: "center"` and `marginHorizontal: "auto"` ensure that content is readable and well-balanced on all screen sizes.
+
+### 2. Use of Elevation & Color Contrast
+
+- `StyledButton` follows Material Design by using `react-native-paper`’s `Button` component with:
+
+- `mode="contained"` for clear visual hierarchy.
+- Custom theming through a consistent background color (`#FF6F61`) and vertical padding (`contentStyle={{ paddingVertical: 12 }}`).
+- Appropriate text sizes (`labelStyle={{ fontSize: 18 }}`) and layout spacing (`marginVertical: 15`, `alignSelf: "center"`, `width: "80%"`), aligning with Material Design principles like clarity, legibility, and accessible touch targets.
+
+- Input fields use a white background with subtle grey borders, this ensures good color contrast and readability across devices and lighting conditions.
+
+### 3. Spacing and Padding
+
+- The use of `padding: 15` and `marginBottom` across containers and inputs aligns with Material Design’s emphasis on whitespace as a layout tool.
+- These spacing patterns help prevent visual clutter and guide user focus naturally.
+
+---
+
+## WireFrames
+
+![Screens](./design.png)
+![Screens](./design2.png)
