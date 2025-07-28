@@ -32,13 +32,6 @@ export default function CreateGame() {
         <View style={styles.container}>
           <Counter />
         </View>
-        <Text style={styles.label}>Game Code:</Text>
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={setValue}
-          placeholder="Game Code"
-        />
         <StyledButton title="Create Game" href="/startGame" />
       </View>
     </View>

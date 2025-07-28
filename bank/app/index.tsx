@@ -30,9 +30,9 @@ export default function HomeScreen() {
           onChangeText={setValue}
           placeholder="Enter code"
         />
-        <StyledButton title="Join" href="/waitingRoom" />
+        <StyledButton title="Join" href={`/createUser?type=player`} />
         <View style={styles.container}>
-          <Pressable onPress={() => router.push("/createGame")}>
+          <Pressable onPress={() => router.push(`/createUser?type=host`)}>
             <Text style={styles.linkText}>Create Game</Text>
           </Pressable>
         </View>
