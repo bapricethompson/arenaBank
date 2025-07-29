@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
-export default function Dropdown() {
-  const [groupSize, setGroupSize] = useState("1");
+export default function Dropdown({ groupSize, setGroupSize }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,9 +19,9 @@ export default function Dropdown() {
         ]}
         setOpen={setOpen}
         setValue={setGroupSize}
-        containerStyle={styles.pickerContainer}
+        containerStyle={{ zIndex: open ? 3000 : 1 }}
         style={styles.picker}
-        dropDownStyle={styles.dropdown}
+        dropDownContainerStyle={styles.dropdown}
         labelStyle={styles.labelStyle}
         placeholder="Select Group Size"
       />

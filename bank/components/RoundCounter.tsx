@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-const Counter = () => {
-  const [count, setCount] = useState(10);
+const Counter = ({ rounds, setRounds }) => {
+  const count = parseInt(rounds || "10");
 
   const decrement = () => {
-    if (count > 0) setCount(count - 1);
+    if (count > 1) setRounds(String(count - 1));
+  };
+
+  const increment = () => {
+    setRounds(String(count + 1));
   };
 
   return (
@@ -16,7 +20,7 @@ const Counter = () => {
 
       <Text style={styles.count}>{count}</Text>
 
-      <Pressable style={styles.button} onPress={() => setCount(count + 1)}>
+      <Pressable style={styles.button} onPress={increment}>
         <Text style={styles.symbol}>+</Text>
       </Pressable>
     </View>

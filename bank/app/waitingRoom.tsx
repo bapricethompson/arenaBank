@@ -8,7 +8,7 @@ export default function WaitingRoom() {
         style={{
           fontWeight: "bold",
           fontSize: 20,
-          color: "#FFF5E1",
+          color: "white",
           alignSelf: "center",
         }}
       >
