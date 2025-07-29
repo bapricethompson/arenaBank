@@ -8,11 +8,46 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import StyledButton from "../components/Button";
+import { saveData } from "../hooks/useStorage";
+import { FindGame } from "../modules/FindGame";
 
 export default function HomeScreen() {
   const [value, setValue] = useState("");
   const router = useRouter();
+
+  const handleJoin = async () => {
+    if (!value.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Room code required",
+        text2: "Please enter a room code to join.",
+        position: "bottom",
+        visibilityTime: 3000,
+      });
+      return;
+    }
+    try {
+      await saveData("roomCode", value.trim());
+      console.log("here");
+      const resp = await FindGame({
+        gameCode: value.trim(),
+      });
+      await saveData("gameId", resp.id);
+      router.push(`/createUser?type=player`);
+    } catch (e) {
+      console.error("Failed to save room code:", e);
+      Toast.show({
+        type: "error",
+        text1: "Save failed",
+        text2: "Failed to save room code. Please try again.",
+        position: "bottom",
+        visibilityTime: 3000,
+      });
+    }
+  };
+
   return (
     <View>
       <View style={styles.mainContent}>
@@ -29,14 +64,17 @@ export default function HomeScreen() {
           value={value}
           onChangeText={setValue}
           placeholder="Enter code"
+          autoCapitalize="characters"
         />
-        <StyledButton title="Join" href={`/createUser?type=player`} />
+
+        <StyledButton title="Join" onPress={handleJoin} />
         <View style={styles.container}>
           <Pressable onPress={() => router.push(`/createUser?type=host`)}>
             <Text style={styles.linkText}>Create Game</Text>
           </Pressable>
         </View>
       </View>
+      <Toast />
     </View>
   );
 }

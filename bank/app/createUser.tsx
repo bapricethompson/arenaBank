@@ -2,6 +2,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import StyledButton from "../components/Button";
+import { loadData, saveData } from "../hooks/useStorage";
+import { PostPlayer } from "../modules/PostPlayer";
+import { PostUser } from "../modules/PostUser";
 
 export default function CreateUser() {
   const params = useLocalSearchParams();
@@ -38,15 +41,37 @@ export default function CreateUser() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isFormValid) return;
 
-    if (type === "player") {
-      console.log("here");
-      router.push("/waitingRoom");
-    } else if (type === "host") {
-      console.log("here2");
-      router.push("/createGame");
+    try {
+      const response = await PostUser({ username, email });
+      console.log("User created:", response);
+      await saveData("userId", response.userId);
+
+      if (type === "player") {
+        const gameId = await loadData("gameId");
+        if (!gameId) {
+          console.error("No game code found in storage");
+          return;
+        }
+        console.log("gaem", gameId);
+        const resp = await PostPlayer({
+          gameId: gameId,
+          userId: response.userId,
+        });
+        router.push({
+          pathname: "/waitingRoom",
+          params: { userId: response.userId },
+        });
+      } else if (type === "host") {
+        router.push({
+          pathname: "/createGame",
+          params: { userId: response.userId },
+        });
+      }
+    } catch (error) {
+      console.error("Failed to create user:", error.message);
     }
   };
 
@@ -87,13 +112,7 @@ export default function CreateUser() {
 
       <StyledButton
         title="Create User"
-        href={
-          type === "player"
-            ? "/waitingRoom"
-            : type === "host"
-            ? "/createGame"
-            : "/"
-        }
+        onPress={handleSubmit}
         disabled={!isFormValid}
       />
     </View>

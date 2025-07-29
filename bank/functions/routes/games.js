@@ -77,6 +77,34 @@ router.get("/:gameId", async (req, res) => {
   res.status(200).json(snapshot.val());
 });
 
+router.get("/code/:gameCode", async (req, res) => {
+  const { gameCode } = req.params;
+
+  try {
+    // Query games where code === gameCode
+    const snapshot = await db
+      .ref("games")
+      .orderByChild("code")
+      .equalTo(gameCode)
+      .once("value");
+
+    const games = snapshot.val();
+
+    if (!games) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    // Since code is unique, return the first match
+    const gameId = Object.keys(games)[0];
+    const game = games[gameId];
+
+    res.status(200).json(game);
+  } catch (error) {
+    console.error("Error fetching game by code:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // UPDATE
 router.patch("/:gameId", async (req, res) => {
   const { inPlay, ended } = req.body;

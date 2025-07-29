@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
       score: 0,
       joinedAt: new Date().toISOString(),
     });
-    res.status(201).send("Player added with score 0");
+    res.status(201).json({ message: "Player added with score 0" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -6,15 +6,23 @@ export default function StyledButton({
   href,
   title = "Join",
   disabled = false,
+  onPress,
 }) {
   const router = useRouter();
-
   const buttonColor = disabled ? "#ccc" : "#FF6F61";
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    } else if (href) {
+      router.push(href);
+    }
+  };
 
   return (
     <Button
       mode="contained"
-      onPress={() => router.push(href)}
+      onPress={handlePress}
       disabled={disabled}
       style={{
         marginVertical: 15,
