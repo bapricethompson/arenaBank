@@ -3,10 +3,11 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import DiceRoller from "../components/Dice";
 import GameButton from "../components/GameButton";
 import { loadData } from "../hooks/useStorage";
-import { initSocket } from "../utils/socket";
+import { getSocket, initSocket } from "../utils/socket";
 
 export default function GamePlay() {
   const [round, setRound] = useState(1);
+  const [maxRounds, setMaxRounds] = useState(10);
   const [countdown, setCountdown] = useState(5);
   const [rollTrigger, setRollTrigger] = useState(0);
   const [pot, setPot] = useState(0);
@@ -18,23 +19,32 @@ export default function GamePlay() {
   const [diceFromSocket, setDiceFromSocket] = useState([1, 1]);
 
   useEffect(() => {
+    // Load roomCode and check if this client is the host
     async function loadStorage() {
-      const savedRoomCode = await loadData("roomCode");
-      const savedPlayerName = await loadData("userName");
-      setRoomCode(savedRoomCode);
-      setPlayerName(savedPlayerName);
+      try {
+        const savedRoomCode = await loadData("roomCode");
+        const savedUser = await loadData("userName");
+        const max = await loadData("roudns");
+        setMaxRounds(max);
+        setPlayerName(savedUser);
+        setRoomCode(savedRoomCode);
+      } catch (error) {
+        console.error("Failed to load storage:", error.message);
+      }
     }
     loadStorage();
   }, []);
 
   useEffect(() => {
+    console.log("room", roomCode);
+    console.log("playerName", playerName);
+
     if (!roomCode || !playerName) return;
 
-    const socket = initSocket(); // ✅ persistent instance
+    const socket = initSocket(); // persistent instance
 
-    socket.onopen = () => {
+    function handleOpen() {
       console.log("WebSocket connected (GamePlay)");
-
       socket.send(
         JSON.stringify({
           type: "join",
@@ -42,10 +52,11 @@ export default function GamePlay() {
           name: playerName,
         })
       );
-    };
+    }
 
-    socket.onmessage = (event) => {
+    function handleMessage(event) {
       const data = JSON.parse(event.data);
+      console.log("Received WebSocket message:", data);
 
       switch (data.type) {
         case "leaderboard_update":
@@ -66,20 +77,43 @@ export default function GamePlay() {
         case "error":
           setMessages((prev) => [...prev, `Error: ${data.message}`]);
           break;
+        case "round_update":
+          setRound(data.round);
+          setMessages((prev) => [...prev, `🔄 Starting Round ${data.round}`]);
+          break;
+        case "game_over":
+          setMessages((prev) => [...prev, "🏁 Game Over!"]);
+          // Optionally show leaderboard / final scores
+          break;
         default:
           break;
       }
-    };
+    }
 
-    socket.onerror = (error) => {
+    function handleError(error) {
       console.error("WebSocket error:", error.message);
-    };
+    }
 
-    socket.onclose = () => {
+    function handleClose() {
       console.log("WebSocket connection closed");
-    };
+    }
 
-    // ⚠️ DO NOT close socket here or on unmount!
+    if (socket.readyState === WebSocket.OPEN) {
+      handleOpen();
+    } else {
+      socket.addEventListener("open", handleOpen);
+    }
+
+    socket.addEventListener("message", handleMessage);
+    socket.addEventListener("error", handleError);
+    socket.addEventListener("close", handleClose);
+
+    return () => {
+      socket.removeEventListener("open", handleOpen);
+      socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("error", handleError);
+      socket.removeEventListener("close", handleClose);
+    };
   }, [roomCode, playerName]);
 
   useEffect(() => {
@@ -115,7 +149,9 @@ export default function GamePlay() {
       <View>
         <View style={styles.gameInfo}>
           <Text style={styles.gameText}>Round:</Text>
-          <Text style={styles.gameText}>7/10</Text>
+          <Text style={styles.gameText}>
+            {round}/{maxRounds}
+          </Text>
         </View>
         <View style={styles.gameInfo}>
           <Text style={styles.gameText}>Banked Players:</Text>
@@ -123,7 +159,6 @@ export default function GamePlay() {
         </View>
         <ScrollView style={styles.leaderBoard}>
           <View>
-            {/* Render leaderboard dynamically if you want */}
             {Object.entries(leaderboard).map(([player, score]) => (
               <View key={player} style={styles.player}>
                 <Text>{player}</Text>

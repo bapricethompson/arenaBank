@@ -51,6 +51,7 @@ export default function CreateGame() {
       const response = await PostGame({ hostId, groupSize, rounds, gameName });
       console.log("Game created:", response);
       await saveData("userRole", "host");
+      await saveData("rounds", rounds);
 
       await saveData("gameId", response.gameId);
       await saveData("roomCode", response.code);
