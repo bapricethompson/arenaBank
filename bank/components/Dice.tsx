@@ -35,69 +35,54 @@ const diceFaces = {
   ],
 };
 
-const DiceRoller = ({ trigger, onPotChange }) => {
+const DiceRoller = ({ trigger, onPotChange, externalDice }) => {
   const [dice, setDice] = useState([1, 1]);
-  const [rolls, setRolls] = useState(0);
   const [pot, setPot] = useState(0);
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
+  // Effect to update dice when trigger changes or externalDice changes
   useEffect(() => {
-    rollDice();
-  }, [trigger]);
+    if (externalDice && externalDice.length === 2) {
+      setDice(externalDice);
+      updatePot(externalDice);
+      runShakeAnimation();
+    } else {
+      rollDice();
+    }
+  }, [trigger, externalDice]);
 
+  // Pass pot to parent whenever it changes
   useEffect(() => {
     onPotChange(pot);
   }, [pot]);
+
+  const updatePot = (diceVals) => {
+    const sum = diceVals[0] + diceVals[1];
+    const isDouble = diceVals[0] === diceVals[1];
+
+    setPot((prevPot) => {
+      // This logic you can adjust to fit your game rules
+      if (sum === 7) {
+        return 0;
+      } else if (isDouble) {
+        return prevPot * 2;
+      } else {
+        return prevPot + sum;
+      }
+    });
+  };
 
   const rollDice = () => {
     const newDice = [
       Math.ceil(Math.random() * 6),
       Math.ceil(Math.random() * 6),
     ];
-
     setDice(newDice);
+    updatePot(newDice);
+    runShakeAnimation();
+  };
 
-    const sum = newDice[0] + newDice[1];
-    const isDouble = newDice[0] === newDice[1];
-
-    // First update rolls and get the new rolls count
-    setRolls((prevRolls) => {
-      const newRolls = prevRolls + 1;
-
-      // Then update pot based on newRolls and dice outcome
-      setPot((prevPot) => {
-        console.log(
-          "🎲 Rolled Dice:",
-          newDice,
-          "Sum:",
-          newDice[0] + newDice[1]
-        );
-        if (sum === 7) {
-          if (newRolls <= 3) {
-            return prevPot + 70;
-          } else {
-            return 0;
-          }
-        } else if (isDouble) {
-          if (newRolls <= 3) {
-            return prevPot + sum;
-          } else {
-            return prevPot * 2;
-          }
-        } else {
-          return prevPot + sum;
-        }
-      });
-
-      // Reset rolls to 0 if sum is 7 and newRolls > 3
-      if (sum === 7 && newRolls > 3) {
-        setRolls(0);
-      }
-
-      return newRolls; // update rolls state
-    });
-
-    // Shake animation
+  const runShakeAnimation = () => {
     Animated.sequence([
       Animated.timing(shakeAnim, {
         toValue: 10,

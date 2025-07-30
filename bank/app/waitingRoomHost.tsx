@@ -1,7 +1,99 @@
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
+import StyledButton from "../components/Button";
+import { loadData } from "../hooks/useStorage";
+import { PatchGame } from "../modules/PatchGame";
+import { getSocket, initSocket } from "../utils/socket";
 
-export default function WaitingRoom() {
+export default function WaitingRoomHost() {
+  const router = useRouter();
+  const [roomCode, setRoomCode] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    // Load roomCode and check if this client is the host
+    async function loadStorage() {
+      try {
+        const savedRoomCode = await loadData("roomCode");
+        const savedGameId = await loadData("gameId");
+        const savedRole = await loadData("userRole");
+        setUserRole(savedRole);
+        setRoomCode(savedRoomCode);
+      } catch (error) {
+        console.error("Failed to load storage:", error.message);
+      }
+    }
+    loadStorage();
+  }, []);
+
+  useEffect(() => {
+    if (!roomCode) return;
+
+    const socket = initSocket(); // Reuses the same connection
+
+    socket.onopen = async () => {
+      console.log("WebSocket connected (WaitingRoom)");
+      const playerName = await loadData("userName");
+      socket.send(
+        JSON.stringify({
+          type: "join",
+          room: roomCode,
+          name: playerName,
+        })
+      );
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Received WebSocket message:", data);
+      if (data.type === "error") {
+        console.error("Server error:", data.message);
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error.message);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    // No socket closing here!
+  }, [roomCode]);
+
+  const handleSubmit = async () => {
+    try {
+      const gameId = await loadData("gameId");
+      const roomCode = await loadData("roomCode");
+
+      await PatchGame({
+        gameId: gameId,
+        inPlay: true,
+        ended: false,
+      });
+
+      const socket = getSocket();
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: "start_game",
+            room: roomCode,
+          })
+        );
+        console.log("Sent start_game message");
+      } else {
+        console.error("WebSocket is not open");
+      }
+
+      router.push("/gamePlay");
+    } catch (error) {
+      console.error("Failed to start game:", error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text
@@ -10,10 +102,12 @@ export default function WaitingRoom() {
           fontSize: 20,
           color: "white",
           alignSelf: "center",
+          marginBottom: 20,
         }}
       >
         Ready to Start?
       </Text>
+      <StyledButton title="Start Game" onPress={handleSubmit} />
     </View>
   );
 }
@@ -21,25 +115,5 @@ export default function WaitingRoom() {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
-  },
-  guidelinesContainer: {
-    marginBottom: 32,
-    backgroundColor: "#FFBF00",
-    width: "90%",
-    padding: 30,
-    marginHorizontal: "auto",
-    marginVertical: 10,
-    borderRadius: 5,
-  },
-  rules: {
-    width: "90%",
-    marginHorizontal: "auto",
-    marginTop: 15,
-  },
-  guideline: {
-    fontSize: 16,
-    marginBottom: 12,
-    color: "black",
-    fontWeight: "bold",
   },
 });

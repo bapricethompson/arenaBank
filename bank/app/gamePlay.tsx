@@ -1,16 +1,86 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { io } from "socket.io-client";
 import DiceRoller from "../components/Dice";
 import GameButton from "../components/GameButton";
-
-const socket = io("http://<your-ip>:3001");
+import { loadData } from "../hooks/useStorage";
+import { initSocket } from "../utils/socket";
 
 export default function GamePlay() {
   const [round, setRound] = useState(1);
   const [countdown, setCountdown] = useState(5);
   const [rollTrigger, setRollTrigger] = useState(0);
   const [pot, setPot] = useState(0);
+  const [leaderboard, setLeaderboard] = useState({});
+  const [messages, setMessages] = useState([]);
+  const [bankedPlayers, setBankedPlayers] = useState(new Set());
+  const [roomCode, setRoomCode] = useState(null);
+  const [playerName, setPlayerName] = useState(null);
+  const [diceFromSocket, setDiceFromSocket] = useState([1, 1]);
+
+  useEffect(() => {
+    async function loadStorage() {
+      const savedRoomCode = await loadData("roomCode");
+      const savedPlayerName = await loadData("userName");
+      setRoomCode(savedRoomCode);
+      setPlayerName(savedPlayerName);
+    }
+    loadStorage();
+  }, []);
+
+  useEffect(() => {
+    if (!roomCode || !playerName) return;
+
+    const socket = initSocket(); // ✅ persistent instance
+
+    socket.onopen = () => {
+      console.log("WebSocket connected (GamePlay)");
+
+      socket.send(
+        JSON.stringify({
+          type: "join",
+          room: roomCode,
+          name: playerName,
+        })
+      );
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case "leaderboard_update":
+          setLeaderboard(data.leaderboard);
+          break;
+        case "roll":
+          console.log("roll", data.d1, data.d2);
+          if (data.d1 && data.d2) {
+            setDiceFromSocket([data.d1, data.d2]);
+          }
+          setPot(data.pot);
+          setMessages((prev) => [...prev, data.message || "Dice rolled"]);
+          break;
+        case "banked":
+          setMessages((prev) => [...prev, `${data.name} banked!`]);
+          setBankedPlayers((prev) => new Set(prev).add(data.name));
+          break;
+        case "error":
+          setMessages((prev) => [...prev, `Error: ${data.message}`]);
+          break;
+        default:
+          break;
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error.message);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    // ⚠️ DO NOT close socket here or on unmount!
+  }, [roomCode, playerName]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,6 +102,12 @@ export default function GamePlay() {
 
   const handleBank = () => {
     console.log("BANKED!");
+    const socket = getSocket();
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "bank" }));
+    } else {
+      console.warn("Socket is not open");
+    }
   };
 
   return (
@@ -47,29 +123,17 @@ export default function GamePlay() {
         </View>
         <ScrollView style={styles.leaderBoard}>
           <View>
-            <View style={styles.player}>
-              <Text>player1</Text>
-              <Text>500</Text>
-            </View>
-            <View style={styles.player}>
-              <Text>player1</Text>
-              <Text>500</Text>
-            </View>
-            <View style={styles.player}>
-              <Text>player1</Text>
-              <Text>500</Text>
-            </View>
-            <View style={styles.player}>
-              <Text>player1</Text>
-              <Text>500</Text>
-            </View>
-            <View style={styles.player}>
-              <Text>player1</Text>
-              <Text>500</Text>
-            </View>
+            {/* Render leaderboard dynamically if you want */}
+            {Object.entries(leaderboard).map(([player, score]) => (
+              <View key={player} style={styles.player}>
+                <Text>{player}</Text>
+                <Text>{score}</Text>
+              </View>
+            ))}
           </View>
         </ScrollView>
       </View>
+
       <Text
         style={{
           fontSize: 32,
@@ -81,7 +145,13 @@ export default function GamePlay() {
       >
         Rolling in {countdown}...
       </Text>
-      <DiceRoller trigger={rollTrigger} onPotChange={setPot} />
+
+      <DiceRoller
+        trigger={rollTrigger}
+        onPotChange={setPot}
+        externalDice={diceFromSocket} // <-- Pass dice from websocket here
+      />
+
       <Text
         style={{
           fontSize: 32,
@@ -92,6 +162,7 @@ export default function GamePlay() {
       >
         POT:
       </Text>
+
       <Text
         style={{
           fontSize: 96,
@@ -102,6 +173,7 @@ export default function GamePlay() {
       >
         {pot}
       </Text>
+
       <View style={styles.powerHolder}>
         <GameButton
           title="🔥"
@@ -119,13 +191,14 @@ export default function GamePlay() {
           type="powerup"
         />
       </View>
+
       <View style={styles.container}>
         <GameButton
           title="BANK"
           onPress={handleBank}
           type="bank"
           disabledOnceUsed={false}
-          roundKey={round} // triggers re-enable per round
+          roundKey={round}
         />
       </View>
     </View>

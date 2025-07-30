@@ -30,6 +30,7 @@ export default function HomeScreen() {
     }
     try {
       await saveData("roomCode", value.trim());
+      await saveData("userRole", "player");
       console.log("here");
       const resp = await FindGame({
         gameCode: value.trim(),

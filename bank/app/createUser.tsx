@@ -48,6 +48,7 @@ export default function CreateUser() {
       const response = await PostUser({ username, email });
       console.log("User created:", response);
       await saveData("userId", response.userId);
+      await saveData("userName", username);
 
       if (type === "player") {
         const gameId = await loadData("gameId");

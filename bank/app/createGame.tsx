@@ -1,17 +1,41 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import StyledButton from "../components/Button";
 import Dropdown from "../components/DropDown";
 import Counter from "../components/RoundCounter";
 import { loadData, saveData } from "../hooks/useStorage";
 import { PostGame } from "../modules/PostGame";
+import { getSocket, initSocket } from "../utils/socket";
+
 export default function CreateGame() {
   const [hostId, setHostId] = useState("");
   const [groupSize, setGroupSize] = useState("");
   const [rounds, setRounds] = useState("10");
   const [gameName, setGameName] = useState("");
   const router = useRouter();
+  const ws = useRef(null);
+
+  useEffect(() => {
+    const socket = initSocket();
+
+    socket.onopen = () => {
+      console.log("WebSocket connected (CreateGame)");
+    };
+
+    socket.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      console.log("WebSocket message:", data);
+    };
+
+    socket.onerror = (err) => {
+      console.error("WebSocket error:", err.message);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket disconnected (CreateGame)");
+    };
+  }, []);
 
   useEffect(() => {
     const fetchHostId = async () => {
@@ -22,18 +46,30 @@ export default function CreateGame() {
   }, []);
 
   const handleSubmit = async () => {
-    console.log(groupSize, rounds, gameName);
     if (!isFormValid) return;
-
     try {
       const response = await PostGame({ hostId, groupSize, rounds, gameName });
       console.log("Game created:", response);
-      await saveData("gameId", response.code);
-      router.push({
-        pathname: "/waitingRoomHost",
-      });
+      await saveData("userRole", "host");
+
+      await saveData("gameId", response.gameId);
+      await saveData("roomCode", response.code);
+
+      const socket = getSocket();
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: "host_create",
+            room: response.code,
+          })
+        );
+      } else {
+        console.warn("WebSocket not connected yet");
+      }
+
+      router.push("/waitingRoomHost");
     } catch (error) {
-      console.error("Failed to create user:", error.message);
+      console.error("Failed to create game:", error.message);
     }
   };
 
