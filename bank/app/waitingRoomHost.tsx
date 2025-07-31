@@ -102,17 +102,13 @@ export default function WaitingRoomHost() {
 
   return (
     <View style={styles.container}>
-      <Text
-        style={{
-          fontWeight: "bold",
-          fontSize: 20,
-          color: "white",
-          alignSelf: "center",
-          marginBottom: 20,
-        }}
-      >
-        Ready to Start?
-      </Text>
+      <Text style={styles.title}>Ready to Start?</Text>
+
+      <View style={styles.codeContainer}>
+        <Text style={styles.codeLabel}>Room Code:</Text>
+        <Text style={styles.codeValue}>{roomCode}</Text>
+      </View>
+
       <StyledButton title="Start Game" onPress={handleSubmit} />
     </View>
   );
@@ -120,6 +116,36 @@ export default function WaitingRoomHost() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 20,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 24,
+    color: "white",
+    marginBottom: 30,
+    textAlign: "center",
+  },
+  codeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 40,
+    minWidth: 200,
+    justifyContent: "center",
+  },
+  codeLabel: {
+    color: "white",
+    fontSize: 18,
+    marginRight: 8,
+  },
+  codeValue: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
   },
 });

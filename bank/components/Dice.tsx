@@ -35,52 +35,16 @@ const diceFaces = {
   ],
 };
 
-const DiceRoller = ({ trigger, onPotChange, externalDice }) => {
+const DiceRoller = ({ externalDice }) => {
   const [dice, setDice] = useState([1, 1]);
-  const [pot, setPot] = useState(0);
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
-  // Effect to update dice when trigger changes or externalDice changes
   useEffect(() => {
     if (externalDice && externalDice.length === 2) {
       setDice(externalDice);
-      updatePot(externalDice);
       runShakeAnimation();
-    } else {
-      rollDice();
     }
-  }, [trigger, externalDice]);
-
-  // Pass pot to parent whenever it changes
-  useEffect(() => {
-    onPotChange(pot);
-  }, [pot]);
-
-  const updatePot = (diceVals) => {
-    const sum = diceVals[0] + diceVals[1];
-    const isDouble = diceVals[0] === diceVals[1];
-
-    setPot((prevPot) => {
-      // This logic you can adjust to fit your game rules
-      if (sum === 7) {
-        return 0;
-      } else if (isDouble) {
-        return prevPot * 2;
-      } else {
-        return prevPot + sum;
-      }
-    });
-  };
-
-  const rollDice = () => {
-    const newDice = [
-      Math.ceil(Math.random() * 6),
-      Math.ceil(Math.random() * 6),
-    ];
-    setDice(newDice);
-    updatePot(newDice);
-    runShakeAnimation();
-  };
+  }, [externalDice]);
 
   const runShakeAnimation = () => {
     Animated.sequence([
@@ -112,38 +76,34 @@ const DiceRoller = ({ trigger, onPotChange, externalDice }) => {
     ]).start();
   };
 
-  const renderDie = (value, index) => {
-    return (
-      <Animated.View
-        key={index}
-        style={[styles.die, { transform: [{ translateX: shakeAnim }] }]}
-      >
-        <View style={styles.dieFace}>
-          {[0, 1, 2].map((row) => (
-            <View key={row} style={styles.dieRow}>
-              {[0, 1, 2].map((col) => {
-                const isDot = diceFaces[value].some(
-                  ([r, c]) => r === row && c === col
-                );
-                return (
-                  <View
-                    key={col}
-                    style={[styles.dot, isDot && styles.dotVisible]}
-                  />
-                );
-              })}
-            </View>
-          ))}
-        </View>
-      </Animated.View>
-    );
-  };
+  const renderDie = (value, index) => (
+    <Animated.View
+      key={index}
+      style={[styles.die, { transform: [{ translateX: shakeAnim }] }]}
+    >
+      <View style={styles.dieFace}>
+        {[0, 1, 2].map((row) => (
+          <View key={row} style={styles.dieRow}>
+            {[0, 1, 2].map((col) => {
+              const isDot = diceFaces[value].some(
+                ([r, c]) => r === row && c === col
+              );
+              return (
+                <View
+                  key={col}
+                  style={[styles.dot, isDot && styles.dotVisible]}
+                />
+              );
+            })}
+          </View>
+        ))}
+      </View>
+    </Animated.View>
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.diceContainer}>
-        {dice.map((val, i) => renderDie(val, i))}
-      </View>
+      <View style={styles.diceContainer}>{dice.map(renderDie)}</View>
     </View>
   );
 };
@@ -184,15 +144,6 @@ const styles = StyleSheet.create({
   },
   dotVisible: {
     backgroundColor: "#000",
-  },
-  button: {
-    backgroundColor: "#FF6F61",
-    padding: 12,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "#FFF",
-    fontWeight: "bold",
   },
 });
 

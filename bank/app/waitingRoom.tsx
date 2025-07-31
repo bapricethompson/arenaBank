@@ -8,6 +8,13 @@ import { initSocket } from "../utils/socket";
 export default function WaitingRoom() {
   const router = useRouter();
   const [roomCode, setRoomCode] = useState(null);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    if (started) {
+      router.push("/gamePlay"); // try all lowercase here
+    }
+  }, [started]);
 
   useEffect(() => {
     async function setupConnection() {
@@ -49,7 +56,7 @@ export default function WaitingRoom() {
 
         if (data.type === "round_update") {
           console.log("Game started! Navigating to gameplay.");
-          router.push("/gamePlay");
+          setStarted(true);
         }
       };
 
