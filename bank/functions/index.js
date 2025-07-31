@@ -3,18 +3,32 @@ const admin = require("firebase-admin");
 const express = require("express");
 const cors = require("cors");
 
-// Init
 admin.initializeApp();
 const app = express();
 
+app.use((req, res, next) => {
+  console.log("🔍 Origin:", req.headers.origin);
+  next();
+});
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:8081",
+  "https://lhtcugo-anonymous-8081.exp.direct",
+  "https://arenabank-3a693.web.app",
+  "https://us-central1-arenabank-3a693.cloudfunctions.net",
+];
+
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "https://db-homeschool.web.app",
-    "https://dbhomeschool.com",
-    "https://us-central1-db-homeschool.cloudfunctions.net",
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn("❌ Blocked CORS for origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };

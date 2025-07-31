@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:5001/arenabank-3a693/us-central1/api";
+const BASE_URL = "https://us-central1-arenabank-3a693.cloudfunctions.net/api";
 
 export async function PatchGame({ gameId, inPlay, ended }) {
   try {
@@ -24,7 +24,7 @@ export async function PatchGame({ gameId, inPlay, ended }) {
 
     return data;
   } catch (error) {
-    console.error("create game error:", error.message);
+    console.error("create game error GetPlayers:", error.message);
     throw error;
   }
 }

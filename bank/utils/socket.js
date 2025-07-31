@@ -4,7 +4,7 @@ let socket = null;
 
 export function initSocket() {
   if (!socket || socket.readyState === WebSocket.CLOSED) {
-    socket = new WebSocket("ws://localhost:8080");
+    socket = new WebSocket("wss://bankwebsocket.onrender.com/");
   }
   return socket;
 }

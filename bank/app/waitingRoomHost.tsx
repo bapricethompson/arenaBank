@@ -69,14 +69,20 @@ export default function WaitingRoomHost() {
       const gameId = await loadData("gameId");
       const roomCode = await loadData("roomCode");
 
+      console.log("gameId", gameId, "roomCode", roomCode);
+
       await PatchGame({
         gameId: gameId,
         inPlay: true,
         ended: false,
       });
 
-      const socket = getSocket();
+      console.log("PatchGame Done");
+
+      const socket = await getSocket();
+      console.log("socket Done");
       if (socket && socket.readyState === WebSocket.OPEN) {
+        console.log("start_game");
         socket.send(
           JSON.stringify({
             type: "start_game",

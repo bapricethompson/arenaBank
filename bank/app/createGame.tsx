@@ -23,9 +23,20 @@ export default function CreateGame() {
       console.log("WebSocket connected (CreateGame)");
     };
 
-    socket.onmessage = (message) => {
+    socket.onmessage = async (message) => {
       const data = JSON.parse(message.data);
       console.log("WebSocket message:", data);
+
+      if (data.type === "room_created") {
+        console.log("Room successfully created:", data.room);
+
+        // ✅ Save the room code so players can join
+        await saveData("roomCode", data.room);
+      }
+
+      if (data.type === "error") {
+        console.error("Server error:", data.message);
+      }
     };
 
     socket.onerror = (err) => {

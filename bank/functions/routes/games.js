@@ -34,7 +34,9 @@ router.post("/", async (req, res) => {
   try {
     const { hostId, groupSize, rounds, name } = req.body;
 
-    if (!hostId) return res.status(400).send("Missing hostId");
+    if (!hostId) {
+      return res.status(400).json({ error: "Missing hostId" });
+    }
     if (typeof groupSize !== "number" || groupSize <= 0)
       return res.status(400).send("Invalid or missing groupSize");
     if (typeof rounds !== "number" || rounds <= 0)
@@ -114,6 +116,7 @@ router.patch("/:gameId", async (req, res) => {
   if (typeof inPlay === "boolean") updateData.inPlay = inPlay;
   if (typeof ended === "boolean") updateData.ended = ended;
 
+  // Validate that there is data to update
   if (Object.keys(updateData).length === 0) {
     return res.status(400).json({
       error:
@@ -122,12 +125,22 @@ router.patch("/:gameId", async (req, res) => {
   }
 
   try {
-    await db.ref(`games/${req.params.gameId}`).update(updateData);
+    const gameRef = db.ref(`games/${req.params.gameId}`);
+
+    // Check if the game exists before updating
+    const snapshot = await gameRef.once("value");
+    if (!snapshot.exists()) {
+      return res.status(404).json({ error: "Game not found." });
+    }
+
+    // Perform the update
+    await gameRef.update(updateData);
     res
       .status(200)
       .json({ message: "Game updated", updatedFields: updateData });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error updating game:", error); // It's good practice to log the error on the server
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 

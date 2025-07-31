@@ -1,6 +1,4 @@
-// api/userService.js
-
-const BASE_URL = "http://127.0.0.1:5001/arenabank-3a693/us-central1/api";
+const BASE_URL = "https://us-central1-arenabank-3a693.cloudfunctions.net/api";
 
 export async function PostUser({ username, email }) {
   try {

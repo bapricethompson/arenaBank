@@ -1,7 +1,70 @@
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
+import { loadData } from "../hooks/useStorage";
+import { initSocket } from "../utils/socket";
 
 export default function WaitingRoom() {
+  const router = useRouter();
+  const [roomCode, setRoomCode] = useState(null);
+
+  useEffect(() => {
+    async function setupConnection() {
+      const playerName = await loadData("userName");
+      const savedRoomCode = await loadData("roomCode");
+
+      if (!savedRoomCode || !playerName) {
+        console.error("Missing roomCode or playerName");
+        return;
+      }
+
+      setRoomCode(savedRoomCode);
+      console.log("Joining room:", savedRoomCode);
+
+      const socket = initSocket();
+
+      socket.onopen = () => {
+        console.log("WebSocket connected (Player Waiting Room)");
+        socket.send(
+          JSON.stringify({
+            type: "join",
+            room: savedRoomCode,
+            name: playerName,
+          })
+        );
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Message received:", data);
+
+        if (data.type === "error") {
+          console.error("Error:", data.message);
+          // Optionally redirect to home or show error to user
+          if (data.message === "Room not found.") {
+            router.push("/"); // Redirect to home or error screen
+          }
+        }
+
+        if (data.type === "round_update") {
+          console.log("Game started! Navigating to gameplay.");
+          router.push("/gamePlay");
+        }
+      };
+
+      socket.onerror = (err) => {
+        console.error("WebSocket error:", err.message);
+      };
+
+      socket.onclose = () => {
+        console.warn("WebSocket closed.");
+      };
+    }
+
+    setupConnection();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text

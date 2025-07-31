@@ -37,6 +37,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "BASE_URL": "https://us-central1-arenabank-3a693.cloudfunctions.net/api"
     }
   }
 }
